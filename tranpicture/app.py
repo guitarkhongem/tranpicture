@@ -1,34 +1,27 @@
-# File: app.py
 import streamlit as st
-import tempfile
+import os
 from ocr_module import image_to_text
 
-st.set_page_config(page_title="OCR Ảnh thành Văn bản", layout="centered")
+st.set_page_config(page_title="OCR Hình Ảnh ➔ Văn Bản", layout="centered")
+st.title("🖼️➡️📄 Chuyển Hình Ảnh thành Văn Bản")
 
-st.title("🖼️➡️📝 Chuyển Hình ảnh Thành Văn bản")
-
-uploaded_file = st.file_uploader("📤 Chọn file ảnh để nhận dạng văn bản:", type=["jpg", "jpeg", "png", "bmp", "tiff"])
-
-lang = st.selectbox("🌐 Chọn ngôn ngữ nhận dạng:", options=["eng", "vie"], format_func=lambda x: "Tiếng Anh" if x=="eng" else "Tiếng Việt")
+uploaded_file = st.file_uploader("Tải lên ảnh (jpg, png,...)", type=["png", "jpg", "jpeg"])
 
 if uploaded_file is not None:
-    # Lưu file tạm thời
-    with tempfile.NamedTemporaryFile(delete=False) as tmp_file:
-        tmp_file.write(uploaded_file.read())
-        tmp_path = tmp_file.name
+    # Lưu file tạm
+    with open("temp_image.png", "wb") as f:
+        f.write(uploaded_file.read())
+    
+    st.image("temp_image.png", caption="Ảnh đã tải lên", use_column_width=True)
+    
+    lang = st.selectbox("Chọn ngôn ngữ OCR", ["eng (English)", "vie (Tiếng Việt)"])
+    lang_code = lang.split(" ")[0]
 
-    with st.spinner('🔍 Đang nhận dạng...'):
-        try:
-            result_text = image_to_text(tmp_path, lang=lang)
-            st.success("✅ Nhận dạng thành công!")
-            st.text_area("📋 Kết quả văn bản:", value=result_text, height=300)
-        except Exception as e:
-            st.error(f"Lỗi: {e}")
-
-    # Cho phép tải kết quả về file txt
-    st.download_button(
-        label="📥 Tải kết quả về (.txt)",
-        data=result_text,
-        file_name="ocr_result.txt",
-        mime="text/plain"
-    )
+    if st.button("🧐 Thực hiện OCR"):
+        with st.spinner("Đang nhận dạng..."):
+            try:
+                result_text = image_to_text("temp_image.png", lang=lang_code)
+                st.success("🎉 Nhận dạng thành công!")
+                st.text_area("Kết quả văn bản", result_text, height=300)
+            except Exception as e:
+                st.error(f"Lỗi: {str(e)}")

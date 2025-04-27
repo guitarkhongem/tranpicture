@@ -1,9 +1,6 @@
 import cv2
 import pytesseract
 
-# Nếu cần, chỉ định đường dẫn tới Tesseract OCR
-# pytesseract.pytesseract.tesseract_cmd = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
-
 def image_to_text(image_path, lang='eng'):
     img = cv2.imread(image_path)
     if img is None:
